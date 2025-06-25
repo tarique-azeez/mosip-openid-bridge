@@ -80,6 +80,9 @@ public class BeanConfig {
 	@Value("${mosip.kernel.http.plain.restTemplate.total-max-connections:100}")
 	private Integer plainRestTemplateTotalMaxConnections;
 
+	@Value("${mosip.kernel.http.selftoken.restTemplate.socket-timeout:0}")
+	private Integer socketTimeout;
+
 	@Autowired
 	private TokenValidationHelper tokenValidationHelper;
 
@@ -158,10 +161,10 @@ public class BeanConfig {
 			httpClientBuilder.setSSLSocketFactory(csf);
 		}
 		//Setting socket timeout for the registration processor stagesAdd commentMore actions
-		String socketTimeout = environment.getProperty("registration.processor.socket.timeout");
-		if(StringUtils.isNotEmpty(socketTimeout)) {
+		LOGGER.info("PROPERTY VALUE : "+socketTimeout);
+		if(socketTimeout != 0) {
 			LOGGER.info("Setting response timeout for the registration processor : {}", socketTimeout);
-			RequestConfig config = RequestConfig.custom().setSocketTimeout(Integer.parseInt(socketTimeout)).build();
+			RequestConfig config = RequestConfig.custom().setSocketTimeout(socketTimeout).build();
 			httpClientBuilder.setDefaultRequestConfig(config);
 		}
 		String applName = getApplicationName();
