@@ -13,10 +13,14 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 
+import io.mosip.kernel.core.util.StringUtils;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +50,8 @@ public class BeanConfig {
 
 	@Autowired
 	private TokenHelper tokenHelper;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(BeanConfig.class);
 
 	@Autowired
 	private Environment environment;
@@ -150,6 +156,13 @@ public class BeanConfig {
 				}
 			});
 			httpClientBuilder.setSSLSocketFactory(csf);
+		}
+		//Setting socket timeout for the registration processor stagesAdd commentMore actions
+		String socketTimeout = environment.getProperty("registration.processor.socket.timeout");
+		if(StringUtils.isNotEmpty(socketTimeout)) {
+			LOGGER.info("Setting response timeout for the registration processor : {}", socketTimeout);
+			RequestConfig config = RequestConfig.custom().setSocketTimeout(Integer.parseInt(socketTimeout)).build();
+			httpClientBuilder.setDefaultRequestConfig(config);
 		}
 		String applName = getApplicationName();
 		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
